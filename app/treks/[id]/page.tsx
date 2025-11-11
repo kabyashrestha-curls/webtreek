@@ -81,6 +81,17 @@ export default function TrekDetailPage({ params }: { params: { id: string } }) {
   const [isFavorite, setIsFavorite] = useState(false)
   const [selectedDate, setSelectedDate] = useState('')
   const [guests, setGuests] = useState(1)
+  const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [bookingSubmitting, setBookingSubmitting] = useState(false)
+  const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [bookingForm, setBookingForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    idNumber: '',
+    notes: ''
+  })
+  const [idFile, setIdFile] = useState<File | null>(null)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -302,64 +313,136 @@ export default function TrekDetailPage({ params }: { params: { id: string } }) {
               <h3 className="text-xl font-semibold text-gray-900 mb-6">
                 Book This Trek
               </h3>
-
-              <form className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Number of Guests
-                  </label>
-                  <select
-                    value={guests}
-                    onChange={(e) => setGuests(Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500 focus:border-transparent"
-                  >
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <option key={num} value={num}>
-                        {num} {num === 1 ? 'Person' : 'People'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="border-t pt-6">
-                  <div className="flex justify-between text-lg font-semibold mb-4">
-                    <span>Total Price</span>
-                    <span>${(trekData.price * guests).toLocaleString()}</span>
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-trek-500 hover:bg-trek-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200"
-                  >
-                    Book Now
-                  </button>
-                </div>
-              </form>
-
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                  Need help? Contact our team
-                </p>
-                <a href="mailto:hello@trekadventures.com" className="text-trek-600 hover:text-trek-700 text-sm font-medium">
-                  hello@trekadventures.com
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsBookingOpen(true)}
+                className="w-full bg-trek-500 hover:bg-trek-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200"
+              >
+                Book Now
+              </button>
             </div>
           </div>
         </div>
       </div>
+      {/* Booking Modal */}
+      {isBookingOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => !bookingSubmitting && setIsBookingOpen(false)} />
+          <div className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl shadow-xl overflow-hidden">
+            <div className="px-6 py-4 border-b">
+              <h3 className="text-xl font-semibold text-gray-900">Complete Your Booking</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {trekData.title} • {trekData.location} • {selectedDate || 'Select a date'} • {guests} {guests === 1 ? 'person' : 'people'}
+              </p>
+            </div>
+            <form
+              className="p-6 space-y-5"
+              onSubmit={async (e) => {
+                e.preventDefault()
+                setBookingSubmitting(true)
+                // Simulate API save
+                await new Promise((r) => setTimeout(r, 1200))
+                setBookingSubmitting(false)
+                setBookingSuccess(true)
+                setTimeout(() => {
+                  setIsBookingOpen(false)
+                  setBookingSuccess(false)
+                }, 1500)
+              }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={bookingForm.fullName}
+                    onChange={(e) => setBookingForm({ ...bookingForm, fullName: e.target.value })}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={bookingForm.email}
+                    onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    value={bookingForm.phone}
+                    onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">ID/Passport Number</label>
+                  <input
+                    type="text"
+                    value={bookingForm.idNumber}
+                    onChange={(e) => setBookingForm({ ...bookingForm, idNumber: e.target.value })}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Upload ID Card (PNG or JPEG)</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  onChange={(e) => setIdFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                  required
+                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-trek-50 file:text-trek-700 hover:file:bg-trek-100"
+                />
+                {idFile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selected: {idFile.name} ({Math.round(idFile.size / 1024)} KB)
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                <textarea
+                  rows={4}
+                  value={bookingForm.notes}
+                  onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-trek-500"
+                  placeholder="Dietary needs, medical info, or special requests"
+                />
+              </div>
+              <div className="flex items-center justify-between border-t pt-4">
+                <div className="text-sm text-gray-600">
+                  Total: <span className="font-semibold text-gray-900">${(trekData.price * guests).toLocaleString()}</span>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    disabled={bookingSubmitting}
+                    onClick={() => setIsBookingOpen(false)}
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={bookingSubmitting}
+                    className="px-6 py-2 rounded-lg bg-trek-500 hover:bg-trek-600 text-white font-semibold disabled:opacity-60"
+                  >
+                    {bookingSubmitting ? 'Submitting...' : bookingSuccess ? 'Booked!' : 'Confirm Booking'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,8 +1,8 @@
 {
-  "/treks/[id]/page": "app/treks/[id]/page.js",
-  "/about/page": "app/about/page.js",
-  "/contact/page": "app/contact/page.js",
-  "/api/reviews/route": "app/api/reviews/route.js",
+  "/not-found": "app/not-found.js",
   "/treks/page": "app/treks/page.js",
-  "/page": "app/page.js"
+  "/api/reviews/route": "app/api/reviews/route.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/page": "app/page.js",
+  "/treks/[id]/page": "app/treks/[id]/page.js"
 }
